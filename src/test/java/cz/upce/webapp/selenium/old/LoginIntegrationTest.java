@@ -12,19 +12,4 @@ import static org.junit.Assert.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class LoginIntegrationTest
 {
-
-    @Test
-    public void loginPageCorrectTitle()
-    {
-        int i=0;
-        while (true) {
-            i++;
-            if (i==100000) {
-                System.out.println(0);
-                i=0;
-            }
-        }
-    }
-
-
 }
