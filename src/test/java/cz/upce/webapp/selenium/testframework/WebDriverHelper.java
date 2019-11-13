@@ -3,9 +3,12 @@ package cz.upce.webapp.selenium.testframework;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.opera.OperaDriver;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import java.net.InetAddress;
 
 public class WebDriverHelper {
 
@@ -34,7 +37,17 @@ public class WebDriverHelper {
         WebDriverManager instance = WebDriverManager.getInstance(driverClass);
         instance.setup();
         try {
-            driver = (RemoteWebDriver) driverClass.newInstance();
+            if (driverClass.equals(ChromeDriver.class)) {
+                ChromeOptions options = new ChromeOptions();
+                if (!"PC510".equals(InetAddress.getLocalHost().getHostName())) {
+                    options.setHeadless(true);
+                    options.addArguments("window-size=1200x600");
+                    System.out.println("Running chrome in headless mode");
+                }
+                driver = new ChromeDriver(options);
+            } else {
+                driver = (RemoteWebDriver) driverClass.newInstance();
+            }
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
