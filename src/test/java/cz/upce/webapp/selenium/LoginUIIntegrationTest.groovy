@@ -34,7 +34,7 @@ public class LoginUIIntegrationTest extends Specification
         when:
             def actualDashboardTitle = loginPage
                     .visit()
-                    .submitLoginForm("tester2@test.cz", "test")
+                    .submitLoginForm("NEEXISTUJICI@test.cz", "test")
                     .title
 
         then:
