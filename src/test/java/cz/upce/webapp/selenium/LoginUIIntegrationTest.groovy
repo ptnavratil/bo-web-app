@@ -19,7 +19,7 @@ import static org.junit.Assert.assertNotNull;
  */
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class LoginUITest extends Specification
+public class LoginUIIntegrationTest extends Specification
 {
     @Autowired private LoginPage loginPage;
     @Autowired private DashboardPage dashboardPage;

@@ -228,6 +228,23 @@
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
                 <version>1.6</version>
+                <configuration>
+                    <testSources>
+                        <testSource>
+                            <directory>src/test/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </testSource>
+                        <testSource>
+                            <directory>src/test/groovy</directory>
+                            <directory>src/test</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </testSource>
+                    </testSources>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -235,6 +252,10 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+            <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.0</version>
             </plugin>
         </plugins>
     </build>
