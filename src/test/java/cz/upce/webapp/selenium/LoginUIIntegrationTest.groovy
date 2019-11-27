@@ -6,7 +6,8 @@ import cz.upce.webapp.selenium.testframework.SeleniumTestCase;
 import cz.upce.webapp.selenium.testframework.pages.DashboardPage;
 import cz.upce.webapp.selenium.testframework.pages.LoginPage;
 import org.junit.Before;
-import org.junit.Test;
+import org.junit.Test
+import org.openqa.selenium.WebDriver;
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import spock.lang.Specification;
@@ -24,6 +25,7 @@ public class LoginUIIntegrationTest extends Specification
     @Autowired private LoginPage loginPage;
     @Autowired private DashboardPage dashboardPage;
     @Autowired private Creator creator
+    @Autowired private WebDriver webDriver
 
 
     def "loginPageCorrectTitle"()
@@ -32,13 +34,14 @@ public class LoginUIIntegrationTest extends Specification
             def password = "\$2a\$12" + "\$TNH.f4YLpJgCVduQPUejUOuIifkJ5T7DjINwgslGI5s4u7.Plm6d."
             creator.save(new User(email: "tester2@test.cz", password: password))
         when:
-            def actualDashboardTitle = loginPage
+            loginPage
                     .visit()
-                    .submitLoginForm("NEEXISTUJICI@test.cz", "test")
-                    .title
+                    .submitLoginForm("tester2@test.cz", "test")
 
-        then:
-            dashboardPage.title == actualDashboardTitle;
+                    def titleAfterLogin = webDriver.getTitle()
+
+                then:
+            titleAfterLogin == dashboardPage.title;
 
     }
 /*
