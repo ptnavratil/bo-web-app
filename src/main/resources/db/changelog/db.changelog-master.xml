@@ -8,4 +8,21 @@
     <include file="db.changelog-orderedform.xml" relativeToChangelogFile="true"/>
     <include file="db.changelog-createSupplierTable.xml" relativeToChangelogFile="true"/>
     <include file="db.changelog-createUserTable.xml" relativeToChangelogFile="true"/>
+    <include file="db.changelog-001-addSuppliers.xml" relativeToChangelogFile="true"/>
+    <include file="db.changelog-002-addSuppliersFreeTransport.xml" relativeToChangelogFile="true"/>
+    <!--
+    TODO
+    AND plus %XXX% all search keywords
+    download filled in order Excel
+    Finish implementation of other providers
+        Probio: DONE
+        K-Servis: DONE
+
+    Shopping cart to table
+    Shopping cart to display shipping free limit
+    Send e-mail with order
+    User account editation form
+
+    Parse expiration period
+    -->
 </databaseChangeLog>

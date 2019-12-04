@@ -12,9 +12,9 @@
 
     <form method="POST" action="/upload" enctype="multipart/form-data">
         <input type="file" name="file" id="input-file-now" class="file-upload"/><br/><br/>
-        <select type="cmb_value" name="cmb_value">
+        <select type="cmb_value" name="supplierId">
             <option th:each="supplier : ${suppliers}"
-                    th:value="${supplier.name}"
+                    th:value="${supplier.id}"
                     th:text="${supplier.name}"></option>
         </select>
         <input type="submit" value="Submit" class="btn btn-primary"/>

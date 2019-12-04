@@ -1,6 +1,6 @@
 <nav class="navbar navbar-expand navbar-dark bg-dark static-top" th:fragment="navbar" xmlns:th="http://www.w3.org/1999/xhtml">
 
-    <a class="navbar-brand mr-1" href="index.html">Nuts E-Shop</a>
+    <a class="navbar-brand mr-1" href="/items/1">Nuts E-Shop</a>
 
     <button class="btn btn-link btn-sm text-white order-1 order-sm-0" id="sidebarToggle" href="/items/filter/">
         <i class="fas fa-bars"></i>
@@ -9,7 +9,7 @@
     <form class="d-none d-md-inline-block form-inline ml-auto mr-0 mr-md-3 my-2 my-md-0"
           th:action="@{/items/filter/}" method="post">
         <div class="input-group">
-            <input type="productName" name="productName" class="form-control" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
+            <input th:value="${productName}" type="productName" name="productName" class="form-control" placeholder="Search for..." aria-label="Search" aria-describedby="basic-addon2">
             <div class="input-group-append">
                 <button class="btn btn-primary" type="submit">
                     <i class="fas fa-search"></i>

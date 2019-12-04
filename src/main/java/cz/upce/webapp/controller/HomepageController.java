@@ -1,6 +1,9 @@
 package cz.upce.webapp.controller;
 
+import cz.upce.webapp.dao.stock.repository.SupplierRepository;
 import cz.upce.webapp.dao.users.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,11 +15,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class HomepageController
 {
+
     @GetMapping("/")
     public String getHomepage(Model model)
     {
-        User user = new User();
-        model.addAttribute("user", user);
-        return "homepage/login";
+        return "redirect:/items";
     }
 }

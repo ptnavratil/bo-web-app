@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:layout="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml"
+      layout:decorate="~{fragments/layout.html}">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'Odeslat objednávku ' + ${supplier.name}"></title>
+    <style>
+        label{font-weight:bolder;padding:5pt;}
+    </style>
+</head>
+<body>
+<div layout:fragment="content" class="container">
+
+    <div class="jumbotron">
+        <h1 th:text="'Odeslat objednávku ' + ${supplier.name}"></h1>
+    </div>
+
+    <form name="contactform" method="post" action="/order">
+        <input type="hidden" th:value="${supplier.getId()}" name="supplierId">
+        <table >
+            <tr>
+                 <td valign="top" align="right"><label for="from">Odesílatel (e-mail vašeho obchodu):</label></td>
+                 <td valign="top">
+                    <input th:value="${user}" type="text" name="from" required>
+                </td>
+            </tr>
+            <tr>
+                <td valign="top" align="right"><label for="to">Příjemce *:</label></td>
+                <td valign="top"><input name="to" required th:value="${supplier.getEmail()}"/></td>
+            </tr>
+            <tr>
+                <td valign="top" align="right"><label for="cc">Odeslat kopii na *:</label></td>
+                <td valign="top"><input name="cc" value=""/></td>
+            </tr>
+            <tr>
+                <td valign="top" align="right"><label for="subject">Subject:</label></td>
+                <td valign="top"><input name="subject" value="Nová objednávka"/></td>
+            </tr>
+            <tr>
+                 <td valign="top" align="right">
+                  <label for="body">Zpráva *</label>
+                 </td>
+                 <td valign="top">
+<textarea th:text="${message}" name="body" cols="100" rows="15"></textarea>
+                 </td>
+            </tr>
+            <tr>
+                 <td valign="top">
+                  <label for="comments">Attachment: </label>
+                 </td>
+                 <td valign="top">
+                <a th:text="${supplier.getPricelistName()}" target="_new" href="/download-filled/4"></a>
+                 </td>
+            </tr>
+            <tr>
+                 <td colspan="2" style="text-align:center">
+                  <input type="submit" value="Odeslat e-mail s objednávkou">
+                 </td>
+            </tr>
+        </table>
+    </form>
+</div>
+</body>
+</html>

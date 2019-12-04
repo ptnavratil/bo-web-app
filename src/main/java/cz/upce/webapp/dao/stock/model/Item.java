@@ -2,6 +2,8 @@ package cz.upce.webapp.dao.stock.model;
 
 import javax.transaction.Transactional;
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Objects;
 
 import javax.persistence.*;
@@ -13,8 +15,14 @@ import javax.persistence.*;
 @Entity(name = "Item")
 @Table(name = "item")
 @Transactional
-public class Item implements Serializable
+public class Item implements Serializable, Comparable<Item>
 {
+    @Column
+    public Integer parsedIdx;
+
+    @Column
+    private boolean bio;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true, updatable = false)
@@ -33,16 +41,19 @@ public class Item implements Serializable
     @Column(name = "item_tax", nullable = false)
     private Integer itemTax;
 
-    @ManyToOne(cascade = CascadeType.MERGE)
+    @ManyToOne(cascade = CascadeType.MERGE, optional = false)
     private Supplier supplier;
+    @Column
+    private Integer rowIdx;
 
-    public Item() { }
+    public Item() {
+    }
 
     public Item(String itemName, Double itemQuantity, Double itemPrice, Integer itemTax, Supplier supplier)
     {
         this.itemName = itemName;
         this.itemQuantity = itemQuantity;
-        this.itemPrice = itemPrice;
+        setItemPrice(itemPrice);
         this.itemTax = itemTax;
         this.supplier = supplier;
     }
@@ -84,7 +95,15 @@ public class Item implements Serializable
 
     public void setItemPrice(Double itemPrice)
     {
-        this.itemPrice = itemPrice;
+        this.itemPrice = round(itemPrice,5);
+    }
+
+    public static double round(double value, int places) {
+        if (places < 0) throw new IllegalArgumentException();
+
+        BigDecimal bd = BigDecimal.valueOf(value);
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
     }
 
     public Integer getItemTax()
@@ -136,5 +155,26 @@ public class Item implements Serializable
                 ", itemPrice=" + itemPrice +
                 ", itemTax=" + itemTax +
                 '}';
+    }
+
+    public Integer getRowIdx() {
+        return rowIdx;
+    }
+
+    public void setRowIdx(Integer rowIdx) {
+        this.rowIdx = rowIdx;
+    }
+
+    @Override
+    public int compareTo(Item o) {
+        return o.getRowIdx().compareTo(this.getRowIdx());
+    }
+
+    public boolean isBio() {
+        return bio;
+    }
+
+    public void setBio(boolean bio) {
+        this.bio = bio;
     }
 }

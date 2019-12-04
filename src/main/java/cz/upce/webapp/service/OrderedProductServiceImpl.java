@@ -15,8 +15,14 @@ import org.springframework.stereotype.Service;
 public class OrderedProductServiceImpl
 {
 
+    private OrderedProductsRepository orderedProductsRepository;
+
     @Autowired
-    OrderedProductsRepository orderedProductsRepository;
+    public OrderedProductServiceImpl(OrderedProductsRepository orderedProductsRepository) {
+        this.orderedProductsRepository = orderedProductsRepository;
+        // TODO remove
+        orderedProductsRepository.deleteAll();
+    }
 
     public void addAll(List<OrderedProducts> orderedProductList)
     {

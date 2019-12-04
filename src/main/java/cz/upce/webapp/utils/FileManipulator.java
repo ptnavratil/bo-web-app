@@ -44,7 +44,7 @@ public class FileManipulator
 
     public static void deleteFile(MultipartFile file, String fileToSave)
     {
-        Path path = Paths.get(fileToSave + File.separator + file.getOriginalFilename());
+        Path path = getFilePath(file, fileToSave);
         if (Files.exists(path))
         {
             try
@@ -63,10 +63,14 @@ public class FileManipulator
         }
     }
 
+    public static Path getFilePath(MultipartFile file, String directory) {
+        return Paths.get(directory + File.separator + file.getOriginalFilename());
+    }
+
     public static void saveFile(MultipartFile file, String fileToSave) throws IOException
     {
         byte[] bytes = file.getBytes();
-        Path path = Paths.get(fileToSave + File.separator + file.getOriginalFilename());
+        Path path = getFilePath(file, fileToSave);
         if (Files.exists(path))
         {
             Files.write(path, bytes);

@@ -1,0 +1,46 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+    http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet author="Pavel Jetensky" id="16">
+        <addColumn tableName="suppliers">
+            <column name="free_transport" type="int"></column>
+            <column name="email" type="varchar(100)"></column>
+        </addColumn>
+        <update tableName="suppliers">
+            <column name="free_transport" value="5000"/>
+            <column name="email" value="orisek@orisek.cz"/>
+            <where>name='Oříšek s.r.o.'</where>
+        </update>
+        <update tableName="suppliers">
+            <column name="free_transport" value="2500"/>
+            <column name="email" value="objednavky@countrylife.cz"/>
+            <where>name='Country life'</where>
+        </update>
+        <update tableName="suppliers">
+            <column name="free_transport" value="1000"/>
+            <column name="email" value="objednavky@probio.cz"/>
+            <where>name='PROBIO'</where>
+        </update>
+        <update tableName="suppliers">
+            <column name="free_transport" value="3000"/>
+            <column name="email" value="objednavky@bionebio.cz"/>
+            <where>name='bio nebio'</where>
+        </update>
+        <update tableName="suppliers">
+            <column name="free_transport" value="5000"/>
+            <column name="email" value="k-servis@k-servis.com"/>
+            <where>name='K-Servis'</where>
+        </update>
+        <insert tableName="users">
+            <column name="id" value="2147482999"/>
+            <column name="first_name" value="Iva"/>
+            <column name="last_name" value="Oulehlová"/>
+            <column name="email" value="info@pardubicebezobalu.cz"/>
+            <column name="password" value="$2a$12$TNH.f4YLpJgCVduQPUejUOuIifkJ5T7DjINwgslGI5s4u7.Plm6d."/><!--test-->
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

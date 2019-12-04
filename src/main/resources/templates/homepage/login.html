@@ -30,6 +30,36 @@
             </div>
         </div>
     </div>
+    <div align="center">
+        <h2>Aktuální seznam importovaných ceníků</h2>
+        <table cellspacing="5" cellpadding="5" border="0">
+
+        <tr>
+            <th>Dodavatel</span></th>
+            <th>
+                Poslední importovaný ceník
+            </th>
+            <th>Doprava zdarma</th>
+            <th>Email</th>
+        </tr>
+        <tr th:each="supplier: ${suppliers}"  th:with="
+            freeTransport=${supplier.getFreeTransport()},
+            supplierId=${supplier.getId()}
+            ">
+            <td><span th:text="${supplier.getName()}"></span></td>
+            <td>
+                <a th:text="${supplier.getPricelistName()}" th:href="'/download/' + ${supplier.getId()}"></a>
+            </td>
+            <td th:text="'od ' + ${freeTransport}"> Kč,- s DPH</td>
+            <td><a target="_new"
+                          th:href="'mailto:' + ${supplier.getEmail() +
+                '?subject=Nová objednávka&amp;body=Dobrý den, objednáváme zboží v příloze. '}"
+                          th:text="${supplier.getEmail()}"></a></td>
+        </tr>
+        </table>
+    </div>
+
+
 </div>
 </body>
 </html>

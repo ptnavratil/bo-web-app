@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -38,5 +39,9 @@ public class SecurityServiceImpl implements SecurityService
         {
             SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         }
+    }
+
+    public String authenticatedUserEmail() {
+        return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
     }
 }

@@ -19,10 +19,10 @@ public class User implements Serializable
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name="id")
-    private int id;
+    private Integer id;
 
     @Pattern(regexp = EMAIL_PATTERN)
-    @Column(name="email")
+    @Column(name="email", nullable = false)
     private String email;
 
     @Column(name="first_name")
@@ -31,15 +31,15 @@ public class User implements Serializable
     @Column(name="last_name")
     private String lastName;
 
-    @Column(name="password")
+    @Column(name="password", nullable = false)
     private String password;
 
-    public int getId()
+    public Integer getId()
     {
         return id;
     }
 
-    public void setId(int id)
+    public void setId(Integer id)
     {
         this.id = id;
     }

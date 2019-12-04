@@ -31,6 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService
         }
 
         User user = userNullable.get();
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), new HashSet<>());
+        org.springframework.security.core.userdetails.User user1 = new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), new HashSet<>());
+        return user1;
     }
 }

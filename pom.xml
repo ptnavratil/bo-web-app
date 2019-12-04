@@ -20,6 +20,8 @@
         <apache.poi>3.9</apache.poi>
         <log4j.version>1.2.17</log4j.version>
         <commons-lang3>3.7</commons-lang3>
+        <junit-platform.version>1.2.0</junit-platform.version>
+        <jupiter.version>5.2.0</jupiter.version>
     </properties>
 
     <dependencies>
@@ -33,6 +35,11 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.bonigarcia</groupId>
+            <artifactId>webdrivermanager</artifactId>
+            <version>3.7.1</version>
         </dependency>
 
         <dependency>
@@ -79,7 +86,17 @@
             <version>42.2.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
 
+        <!-- DATABASE -->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
 
         <!-- TEST -->
         <dependency>
@@ -100,15 +117,16 @@
             <version>1.2-groovy-2.4</version>
             <scope>test</scope>
         </dependency>
-
-
-
-        <!-- DATABASE -->
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+            <version>1.8.3</version>
+            <scope>test</scope>
         </dependency>
+
+
+
+
 
 
         <!--dependency>
@@ -125,8 +143,9 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>3.4.0</version>
+            <version>3.141.59</version>
         </dependency>
+
 
         <!--Apache POI - Java API To Access Microsoft Format Files-->
         <dependency>
@@ -164,8 +183,14 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
 
 
+        <!-- TEST -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
@@ -182,6 +207,24 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>2.27.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.10</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.subethamail</groupId>
+            <artifactId>subethasmtp</artifactId>
+            <version>3.1.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-email</artifactId>
+            <version>1.5</version>
             <scope>test</scope>
         </dependency>
 
@@ -209,12 +252,102 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.6</version>
+                <version>1.6.1</version>
+                <configuration>
+                    <testSources>
+                        <testSource>
+                            <directory>src/test/java</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </testSource>
+                        <testSource>
+                            <directory>src/test/groovy</directory>
+                            <directory>src/test</directory>
+                            <includes>
+                                <include>**/*.groovy</include>
+                            </includes>
+                        </testSource>
+                    </testSources>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
+                            <goal>addTestSources</goal>
+                            <goal>generateTestStubs</goal>
                             <goal>compileTests</goal>
+                            <goal>removeTestStubs</goal>
+                            <goal>removeStubs</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.platform</groupId>
+                        <artifactId>junit-platform-surefire-provider</artifactId>
+                        <version>${junit-platform.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>${jupiter.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.junit.vintage</groupId>
+                        <artifactId>junit-vintage-engine</artifactId>
+                        <version>${jupiter.version}</version>
+                    </dependency>
+                </dependencies>
+
+                <configuration>
+                    <detail>true</detail>
+                    <argLine>-Xms2g -Xmx2g -XX:MaxPermSize=500m -Dfile.encoding=UTF-8 -Duser.language=en -Duser.region=US</argLine>
+                    <includes>
+                        <include>%regex[.*]</include>
+                    </includes>
+                    <excludes>
+                        <exclude>%regex[.*Fixme.*]</exclude>
+                        <exclude>%regex[.*(Regression|Integration)Test.*]</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.22.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.junit.platform</groupId>
+                        <artifactId>junit-platform-surefire-provider</artifactId>
+                        <version>${junit-platform.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.junit.jupiter</groupId>
+                        <artifactId>junit-jupiter-engine</artifactId>
+                        <version>${jupiter.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.junit.vintage</groupId>
+                        <artifactId>junit-vintage-engine</artifactId>
+                        <version>${jupiter.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <argLine>-Xms2g -Xmx2g -XX:MaxPermSize=500m -Dfile.encoding=UTF-8 -Duser.language=en -Duser.region=US -Duser.timezone=UTC</argLine>
+                    <includes>
+                        <include>%regex[.*(Regression|Integration)Test.*]</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                        <phase>package</phase>
                     </execution>
                 </executions>
             </plugin>

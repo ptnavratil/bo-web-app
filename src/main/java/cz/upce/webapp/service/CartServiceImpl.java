@@ -1,11 +1,14 @@
 package cz.upce.webapp.service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
+import cz.upce.webapp.controller.dto.SupplierItemsDTO;
 import cz.upce.webapp.dao.stock.model.Item;
 import cz.upce.webapp.dao.stock.model.OrderForm;
 import cz.upce.webapp.dao.stock.model.OrderState;
 import cz.upce.webapp.dao.stock.model.OrderedProducts;
+import cz.upce.webapp.dao.stock.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -24,62 +27,60 @@ public class CartServiceImpl
 
     private OrderedProductServiceImpl orderedProductService;
 
+    private SupplierRepository supplierRepository;
+    private String message;
+
     @Autowired
-    public CartServiceImpl(OrderFormServiceImpl orderFormService, OrderedProductServiceImpl orderedProductService) {
+    public CartServiceImpl(OrderFormServiceImpl orderFormService, OrderedProductServiceImpl orderedProductService, SupplierRepository supplierRepository) {
         this.orderFormService = orderFormService;
         this.orderedProductService = orderedProductService;
+        this.supplierRepository = supplierRepository;
     }
 
-    private Map<Item, Integer> cart = new HashMap<>();
+    private Map<Integer, SupplierItemsDTO> cart = new HashMap<>();
 
     public void addItem(Item item)
     {
-        if (cart.containsKey(item))
-            cart.replace(item, cart.get(item) + 1);
-        else
-            cart.put(item, 1);
+        changeItemAmount(item, 1);
     }
 
     public void removeItem(Item item)
     {
-        if (cart.containsKey(item))
-        {
-            if (cart.get(item) > 1)
-                cart.replace(item, cart.get(item) - 1);
-            else if (cart.get(item) == 1)
-                cart.remove(item);
+        changeItemAmount(item, -1);
+    }
+
+
+    public void changeItemAmount(Item item, int relativeAmountChange) {
+        Integer supplierId = item.getSupplier().getId();
+        Map<Item, Integer> supplierItems = supplierItems(supplierId);
+        Integer bought = supplierItems.get(item);
+        if (bought==null) {
+            bought = 0;
+        }
+        bought+= relativeAmountChange;
+        if (bought==0) {
+            supplierItems.remove(item);
+        } else {
+            supplierItems.put(item, bought);
         }
     }
 
-    public Map<Item, Integer> getItemsInCart()
+    public Map<Item, Integer> supplierItems(Integer supplierId) {
+        SupplierItemsDTO supplierItems = cart.get(supplierId);
+        if (!cart.containsKey(supplierId)) {
+            // TODO During tests, it could be null, change to mock
+            supplierItems = new SupplierItemsDTO();
+            if (supplierRepository!=null) {
+                supplierItems.setSupplier(supplierRepository.getOne(supplierId));
+            }
+            cart.put(supplierId, supplierItems);
+        }
+        return supplierItems;
+    }
+
+    public Map<Integer,SupplierItemsDTO> getItemsInCart()
     {
         return Collections.unmodifiableMap(cart);
-    }
-
-    public Map<Item, Integer> getNutItemsOnly()
-    {
-        Map<Item, Integer> nutItems = new HashMap<>();
-
-        getItemsInCart().forEach((item, count) -> {
-            if(item.getSupplier().getId() == 1){
-                nutItems.put(item, count);
-            }
-        });
-
-        return nutItems;
-    }
-
-    public Map<Item, Integer> getCountryLifeItemsOnly()
-    {
-        Map<Item, Integer> countryLifeItems = new HashMap<>();
-
-        getItemsInCart().forEach((item, count) -> {
-            if(item.getSupplier().getId() == 2){
-                countryLifeItems.put(item, count);
-            }
-        });
-
-        return countryLifeItems;
     }
 
     public void checkout()
@@ -90,13 +91,15 @@ public class CartServiceImpl
 
         List<OrderedProducts> list = new ArrayList<>();
 
-        cart.forEach((product, integer) -> {
-            OrderedProducts orderedProduct = new OrderedProducts();
-            orderedProduct.setAmount(integer);
-            orderedProduct.setOrder(order);
-            orderedProduct.setItem(product);
+        cart.forEach((supplierId, supplierItems) -> {
+            supplierItems.forEach((item, amount) -> {
+                OrderedProducts orderedProduct = new OrderedProducts();
+                orderedProduct.setAmount(amount);
+                orderedProduct.setOrder(order);
+                orderedProduct.setItem(item);
 
-            list.add(orderedProduct);
+                list.add(orderedProduct);
+            });
         });
 
         orderedProductService.addAll(list);
@@ -106,42 +109,14 @@ public class CartServiceImpl
 
     public Double getTotal()
     {
-        return cart.entrySet().stream()
-                .map(entry -> entry.getKey().getItemPrice() * entry.getValue())
-                .reduce(Double::sum)
-                .orElse(0.0);
-    }
+        AtomicReference<Double> sum = new AtomicReference<>((double) 0);
+        cart.forEach((supplierId, supplierItems) -> {
+            supplierItems.forEach((item, amount) -> {
+                sum.updateAndGet(v -> v + item.getItemPrice() * item.getItemQuantity() * amount);
+            });
+        });
 
-    public Double getTotalNuts(boolean withTax)
-    {
-        return getNutItemsOnly().entrySet().stream()
-                .map(entry -> countPrice(entry.getKey(), entry.getValue(), withTax))
-                .reduce(Double::sum)
-                .orElse(0.0);
-    }
-
-    public Double getTotalCountryLife(boolean withTax)
-    {
-        return getCountryLifeItemsOnly().entrySet().stream()
-                .map(entry ->countPrice(entry.getKey(), entry.getValue(), withTax))
-                .reduce(Double::sum)
-                .orElse(0.0);
-    }
-
-    public Double getWeightNuts()
-    {
-        return getNutItemsOnly().entrySet().stream()
-                .map(entry -> Double.valueOf(entry.getKey().getItemQuantity()) * entry.getValue())
-                .reduce(Double::sum)
-                .orElse(0.0);
-    }
-
-    public Double getWeightCountryLife()
-    {
-        return getCountryLifeItemsOnly().entrySet().stream()
-                .map(entry -> Double.valueOf(entry.getKey().getItemQuantity()) * entry.getValue())
-                .reduce(Double::sum)
-                .orElse(0.0);
+        return sum.get();
     }
 
     private Double countPrice(Item item, Integer value, boolean withTax)
@@ -156,5 +131,19 @@ public class CartServiceImpl
         }
 
         return price;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getAndClearMessage() {
+        String result = this.message;
+        this.message = null;
+        return result;
+    }
+
+    public void removeSupplier(Integer supplierId) {
+        cart.remove(supplierId);
     }
 }

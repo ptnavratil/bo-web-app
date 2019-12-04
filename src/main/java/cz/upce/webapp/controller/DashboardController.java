@@ -30,18 +30,7 @@ public class DashboardController
 
         this.orderedProductService = orderedProductService;
         this.supplierRepository = supplierRepository;
-    }
 
-    @GetMapping("/dashboard")
-    public String getDashBoard(Model model)
-    {
-        List<OrderedProducts> products = orderedProductService.findAllOrderedProducts();
-
-        List<Order> orderList = products.stream()
-                .map(pr -> new Order(pr.getItem(), pr.getOrderForm().getState(), pr.getAmount())).collect(Collectors.toList());
-
-        model.addAttribute("items", orderList);
-        return "dashboard/dashboard";
     }
 
     @GetMapping("/price_list")

@@ -9,54 +9,97 @@
 <div layout:fragment="content" class="container">
 
     <div class="jumbotron">
-        <h1>Your shopping cart<span th:if="${totalItemsCount} == 0"> - is empty!</span></h1>
+        <h1>Váš nákupní košík <span th:if="${totalItemsCount} == 0"> je prázdný</span></h1>
+        <h3 th:text="${message}" class="info"></h3>
     </div>
 
-    <div th:if="${weightNuts} > 0">
-        <h1>Produkty od dodavatele Oříšek s.r.o.</h1>
-        <hr>
-        <div th:each="item: ${nutItems}">
-            <h2 th:text="${item.getKey().getItemName()}">Item name</h2>
-            <h3>Počet:</h3>
-            <h4 th:text="${item.getValue()}">Quantity</h4>
+    <div th:each="supplierItems: ${itemsInCart.values()}" th:with="
+            freeTransport=${supplierItems.getSupplier().getFreeTransport()},
+            supplierId=${supplierItems.getSupplier().getId()}
+            ">
 
-            <a th:href="@{'/cart/addItem/' + ${item.getKey().getItemId()}}">Zvýšit počet</a>
-            <br>
-            <a th:href="@{'/cart/removeItem/' + ${item.getKey().getItemId()}}">Snížit počet</a>
-            <hr>
-        </div>
+        <h1>Produkty od dodavatele <span th:text="${supplierItems.getSupplier().getName()}"></span></h1>
+
+        <!--<h1>Produkty od dodavatele <span th:text="${itemsInCart[4].supplier}"></span></h1>-->
+        <h5>
+            Ceník:
+            <a th:text="${supplierItems.getSupplier().getPricelistName()}" th:href="'/download/' + ${supplierId}"></a>
+        </h5>
+        <h5 th:text="'Doprava zdarma od ' + ${freeTransport}"> Kč,- s DPH</h5>
+        <h5>Email: <a target="_new"
+                th:href="'mailto:' + ${supplierItems.getSupplier().getEmail() +
+                '?subject=Nová objednávka&amp;cc=info@pardubicebezobalu.cz&amp;body=Dobrý den, objednáváme zboží v příloze. '}"
+                th:text="${supplierItems.getSupplier().getEmail()}"></a></h5>
+
+        <hr>
+        <table border="1" cellpadding="5">
+            <tr>
+                <th>Produkt</th>
+                <th>Objednané množství</th>
+                <th>Velikost balení (kg)</th>
+                <th>Cena za kg<br>(Bez DPH)</th>
+                <th>Cena za kg<br>(s DPH)</th>
+                <th>Cena celkem<br>(Bez DPH)</th>
+                <th>Cena celkem<br>(s DPH)</th>
+                <th>Akce</th>
+            </tr>
+            <tr th:each="item: ${supplierItems}">
+                <td th:text="${item.getKey().getItemName()}">Item name</td>
+                <td th:text="${item.getValue()}">Quantity</td>
+                <td th:text="${item.getKey().getItemQuantity()/1000}">Quantity</td>
+                <td th:text="${item.getKey().getItemPrice()*1000}">Quantity</td>
+                <td th:text="${#numbers.formatDecimal(item.getKey().getItemPrice()*1000*(1+item.getKey().getItemTax()*0.01), 0, 1)}">Quantity</td>
+                <td th:text="${#numbers.formatDecimal(item.getKey().getItemQuantity()*item.getValue()*item.getKey().getItemPrice(),0,1)}">Quantity</td>
+                <td th:text="${#numbers.formatDecimal(item.getKey().getItemQuantity()*item.getValue()*item.getKey().getItemPrice()*(1+item.getKey().getItemTax()*0.01), 0, 1)}">Quantity</td>
+                <td>
+                    <a th:href="@{'/cart/addItem/' + ${item.getKey().getItemId()}}">Zvýšit počet</a>
+                    <br>
+                    <a th:href="@{'/cart/removeItem/' + ${item.getKey().getItemId()}}">Snížit počet</a>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="8" align="right" valign="top">
+                    <a th:href="'/order?supplierId=' + ${supplierId}"><input type="button" value="Objednat e-mailem">
+                    </a><br>
+                    <i>Otevře formulář pro odeslání e-mailu s objednávkou v příloze, s možností upravit text</i>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="8" align="right" valign="top">
+                    <a th:href="'/download-filled/' + ${supplierId}"><input type="button" value="Stáhnout vyplněný ceník">
+                    </a><br>
+                    <i>Uloží do počítače vyplněný ceník s objednaným množstvím</i>
+                </td>
+            </tr>
+        </table>
+
         <div>
-            <p>Celková váha: <span th:text="${weightNuts}"></span>g</p>
-            <p>Celková cena bez DPH: <span th:text="${totalNuts}"></span>,- Kč</p>
-            <p>Celková cena s DPH: <span th:text="${totalNutsTax}"></span>,- Kč</p>
+            <ul th:with="
+            total=${supplierItems.getTotal(false)},
+            totalTax=${supplierItems.getTotal(true)},
+            ">
+                <li>Celková váha: <span th:text="${#numbers.formatDecimal(supplierItems.getWeight()/1000,0,1)}"> kg</span></li>
+            <li>Celková cena bez DPH: <span th:text="${#numbers.formatDecimal(total,0,1)}"></span>,- Kč</li>
+            <li>Celková cena s DPH: <span th:text="${#numbers.formatDecimal(totalTax,0,1)}"></span>,- Kč</li>
+
+                
+            <li th:if="(${freeTransport}-${totalTax}) &gt; 0">
+                    <b style="color:red">
+                        <span th:text="'K dopravě zdarma (nad ' + ${freeTransport} + ') zbývá:'"></span>
+                        <span th:text="${#numbers.formatDecimal(freeTransport-totalTax,0,1)} + ',- Kč'"></span>
+                    </b>
+            </li>
+
+            <li th:if="${freeTransport}-${totalTax} &lt; 0">
+                <b style="color:green">
+                    <span th:text="'Doprava zdarma (nad ' + ${freeTransport} + ') navíc:'"></span>
+                    <span th:text="${#numbers.formatDecimal(totalTax - freeTransport,0,1)} + ',- Kč'"></span>
+                </b>
+            </li>
+            </ul>
         </div>
-        <hr>
     </div>
 
-    <div th:if="${weightCountryLife} > 0">
-        <br>
-        <br>
-        <h1>Produkty od dodavatele Country life</h1>
-        <hr>
-        <div th:each="item: ${countryLifeItems}">
-            <h2 th:text="${item.getKey().getItemName()}">Item name</h2>
-            <h2 th:text="${item.getValue()}">Quantity</h2>
-
-            <a th:href="@{'/cart/removeItem/' + ${item.getKey().getItemId()}}">Snížit počet</a>
-            <hr>
-        </div>
-        <div>
-            <p>Celková váha: <span th:text="${weightCountryLife}"></span>g</p>
-            <p>Celková cena bez DPH: <span th:text="${totalCountryLife}"></span>,- Kč</p>
-            <p>Celková cena s DPH: <span th:text="${totalCountryLifeTax}"></span>,- Kč</p>
-        </div>
-        <hr>
-    </div>
-
-
-    <div th:if="${totalItemsCount} > 0">
-        <a th:href="@{'/cart/checkout'}">Koupit</a>
-    </div>
 </div>
 </body>
 </html>
